@@ -25,6 +25,7 @@ connect();
 const server = require('./api/warehouse');
 const port = process.env.API_PORT;
 server.listen(port);
+console.log(`Thrift server is listening on port ${port}...`)
 
 
 

@@ -15,12 +15,6 @@ const username = process.env.TEST_DB_USERNAME;
 const password = process.env.TEST_DB_PASSWORD;
 
 describe('Database integration', () => {
-    const someItem = new storage.Item({
-        name: 'some name',
-        price: 100,
-        arrivalDate: new Date(),
-        quantity: 10
-    });
 
     before(async () => {
         mongoose.connect(

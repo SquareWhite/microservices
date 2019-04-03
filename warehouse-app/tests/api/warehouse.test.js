@@ -35,9 +35,6 @@ describe('Thrift server', () => {
         const transport = thrift.TBufferedTransport;
         const protocol = thrift.TBinaryProtocol;
         connection = thrift.createConnection("localhost", port, {transport, protocol});
-        connection.on('error', function (err) {
-            assert(false, err);
-        });
         client = thrift.createClient(Warehouse, connection);
 
         // Mock database functions

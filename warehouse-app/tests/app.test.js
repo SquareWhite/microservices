@@ -27,9 +27,6 @@ describe('Service test', () => {
         const transport = thrift.TBufferedTransport;
         const protocol = thrift.TBinaryProtocol;
         connection = thrift.createConnection("localhost", port, {transport, protocol});
-        connection.on('error', function (err) {
-            assert(false, err);
-        });
         client = thrift.createClient(Warehouse, connection);
 
         // Clear db
@@ -60,10 +57,3 @@ describe('Service test', () => {
         await client.deleteItem({name: 'updated name'});
     });
 });
-
-
-
-
-
-
-

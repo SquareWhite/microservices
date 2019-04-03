@@ -8,7 +8,6 @@ const NumberInt = require('mongoose-int32');
 const Double = require('@mongoosejs/double');
 
 
-
 let manufacturer = new mongoose.Schema({
     name: {
         type: String,
@@ -44,7 +43,6 @@ let item = new mongoose.Schema({
         required: true
     }
 });
-
 
 let Manufacturer = mongoose.model('manufacturer', manufacturer);
 let Item = mongoose.model('item', item);

@@ -22,8 +22,8 @@ services:
     image: warehouse-db
     ports:
       - 27017:27017
-#    volumes:
-#      - ./warehouse-db/db:/data/db
+    volumes:
+      - ./warehouse-db/db:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${WAREHOUSE_DB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${WAREHOUSE_DB_ROOT_PASSWORD}
