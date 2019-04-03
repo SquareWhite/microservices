@@ -1,0 +1,37 @@
+version: "3"
+services:
+  warehouse-app:
+    image: warehouse-app
+    ports:
+      - ${WAREHOUSE_APP_API_PORT}:${WAREHOUSE_APP_API_PORT}
+    environment:
+      - API_PORT=${WAREHOUSE_APP_API_PORT}
+      - DB_HOST=${WAREHOUSE_DB_HOST}
+      - DB_NAME=${WAREHOUSE_DB_NAME}
+      - DB_USERNAME=${WAREHOUSE_DB_USERNAME}
+      - DB_PASSWORD=${WAREHOUSE_DB_PASSWORD}
+      - TEST_DB_HOST=${WAREHOUSE_DB_HOST}
+      - TEST_DB_NAME=${WAREHOUSE_DB_NAME}
+      - TEST_DB_USERNAME=${WAREHOUSE_DB_USERNAME}
+      - TEST_DB_PASSWORD=${WAREHOUSE_DB_PASSWORD}
+    networks:
+      - warehouse
+    depends_on:
+      - warehouse-db
+  warehouse-db:
+    image: warehouse-db
+    ports:
+      - 27017:27017
+#    volumes:
+#      - ./warehouse-db/db:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${WAREHOUSE_DB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${WAREHOUSE_DB_ROOT_PASSWORD}
+      - DB_NAME=${WAREHOUSE_DB_NAME}
+      - DB_USERNAME=${WAREHOUSE_DB_USERNAME}
+      - DB_PASSWORD=${WAREHOUSE_DB_PASSWORD}
+    networks:
+      - warehouse
+networks:
+  warehouse:
+    driver: bridge
