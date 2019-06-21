@@ -18,7 +18,8 @@ describe('Database integration', () => {
 
     before(async () => {
         mongoose.connect(
-            `mongodb://${username}:${password}@${host}:27017/${dbName}`,
+            // `mongodb://${username}:${password}@${host}:27017/${dbName}`,
+            `mongodb://${host}:27017/${dbName}`,
             {useNewUrlParser: true}
         );
         await storage.Manufacturer.deleteMany({});
