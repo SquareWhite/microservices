@@ -5,4 +5,4 @@ COPY . .
 
 RUN pip install pipenv && \
     pipenv install --system --deploy --ignore-pipfile
-CMD ["python", "./app.py"]
+CMD ["python", "./src/app.py"]

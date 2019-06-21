@@ -56,4 +56,23 @@ describe('Service test', () => {
         await client.updateItemById(foundItems[0]._id, {name: 'updated name'});
         await client.deleteItem({name: 'updated name'});
     });
+
+    it('prepare order path', async () => {
+        let newItem = {name: 'asd', price: 100, quantity: 3};
+        let newItemId = await client.insertItem(newItem);
+        let item = await client.getItemById(newItemId);
+        await client.prepareOrder(
+          {
+            _id: 'ididid',
+            name: 'name',
+            middleName: 'asd',
+            surname: 'asd',
+            address: 'ads'
+          },
+          [{
+              _id: item._id,
+              quantity: 2
+          }]
+        );
+    });
 });

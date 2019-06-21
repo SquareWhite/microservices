@@ -6,7 +6,7 @@ services:
       - ${WAREHOUSE_APP_API_PORT}:${WAREHOUSE_APP_API_PORT}
     environment:
       - API_PORT=${WAREHOUSE_APP_API_PORT}
-      - DB_HOST=${WAREHOUSE_DB_HOST}
+      - DB_HOST=warehouse-db
       - DB_NAME=${WAREHOUSE_DB_NAME}
       - DB_USERNAME=${WAREHOUSE_DB_USERNAME}
       - DB_PASSWORD=${WAREHOUSE_DB_PASSWORD}
@@ -14,16 +14,18 @@ services:
       - TEST_DB_NAME=${WAREHOUSE_DB_NAME}
       - TEST_DB_USERNAME=${WAREHOUSE_DB_USERNAME}
       - TEST_DB_PASSWORD=${WAREHOUSE_DB_PASSWORD}
+      - LOGISTICS_APP_HOST=logistics
+      - LOGISTICS_APP_PORT=8080
     networks:
-      - warehouse
+      - common
     depends_on:
       - warehouse-db
   warehouse-db:
     image: warehouse-db
-    ports:
-      - 27017:27017
-    volumes:
-      - ./warehouse-db/db:/data/db
+#    ports:
+#      - 27017:27017
+#    volumes:
+#      - ./warehouse-db/db:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${WAREHOUSE_DB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${WAREHOUSE_DB_ROOT_PASSWORD}
@@ -31,7 +33,71 @@ services:
       - DB_USERNAME=${WAREHOUSE_DB_USERNAME}
       - DB_PASSWORD=${WAREHOUSE_DB_PASSWORD}
     networks:
-      - warehouse
+      - common
+  payments-app:
+    image: payments-app
+    ports:
+      - 5000:5000
+    environment:
+      - DB_HOST=payments-db
+      - DB_NAME=${PAYMENTS_DB_NAME}
+      - DB_USERNAME=${PAYMENTS_DB_USERNAME}
+      - DB_PASSWORD=${PAYMENTS_DB_PASSWORD}
+      - WAREHOUSE_HOST=warehouse-app
+      - WAREHOUSE_PORT=${WAREHOUSE_APP_API_PORT}
+    networks:
+      - common
+    depends_on:
+      - payments-db
+      - warehouse-app
+  payments-db:
+    image: payments-db
+    ports:
+      - 5432:5432
+#    volumes:
+#      - ./payments-db/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${PAYMENTS_DB_USERNAME}
+      - POSTGRES_PASSWORD=${PAYMENTS_DB_PASSWORD}
+      - POSTGRES_DB=${PAYMENTS_DB_NAME}
+    networks:
+      - common
+
+  mongodb:
+    image: mongo:latest
+    restart: on-failure
+#    ports:
+#      - "27017:27017"
+    networks:
+      - common2
+  logistics:
+    restart: on-failure
+    image: goodforgod/logistics
+    ports:
+    - "8080:8080"
+    links:
+    - mongodb
+    environment:
+    - MONGO_HOST=mongodb
+    - ADVERTISE_HOST=advertising
+    networks:
+      - common
+      - common2
+  advertising:
+    restart: on-failure
+    image: goodforgod/advertising
+    ports:
+    - "8081:8081"
+    links:
+    - mongodb
+    environment:
+    - MONGO_HOST=mongodb
+    networks:
+      - common2
+
 networks:
-  warehouse:
+  common:
     driver: bridge
+  common2:
+    driver: bridge
+

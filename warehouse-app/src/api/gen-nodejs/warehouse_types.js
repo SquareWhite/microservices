@@ -467,6 +467,117 @@ ItemInfo.prototype.write = function(output) {
   return;
 };
 
+var UserInfo = module.exports.UserInfo = function(args) {
+  this._id = null;
+  this.name = null;
+  this.middleName = null;
+  this.surname = null;
+  this.address = null;
+  if (args) {
+    if (args._id !== undefined && args._id !== null) {
+      this._id = args._id;
+    }
+    if (args.name !== undefined && args.name !== null) {
+      this.name = args.name;
+    }
+    if (args.middleName !== undefined && args.middleName !== null) {
+      this.middleName = args.middleName;
+    }
+    if (args.surname !== undefined && args.surname !== null) {
+      this.surname = args.surname;
+    }
+    if (args.address !== undefined && args.address !== null) {
+      this.address = args.address;
+    }
+  }
+};
+UserInfo.prototype = {};
+UserInfo.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true) {
+    var ret = input.readFieldBegin();
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid) {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this._id = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.name = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.STRING) {
+        this.middleName = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.STRING) {
+        this.surname = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRING) {
+        this.address = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+UserInfo.prototype.write = function(output) {
+  output.writeStructBegin('UserInfo');
+  if (this._id !== null && this._id !== undefined) {
+    output.writeFieldBegin('_id', Thrift.Type.STRING, 1);
+    output.writeString(this._id);
+    output.writeFieldEnd();
+  }
+  if (this.name !== null && this.name !== undefined) {
+    output.writeFieldBegin('name', Thrift.Type.STRING, 2);
+    output.writeString(this.name);
+    output.writeFieldEnd();
+  }
+  if (this.middleName !== null && this.middleName !== undefined) {
+    output.writeFieldBegin('middleName', Thrift.Type.STRING, 3);
+    output.writeString(this.middleName);
+    output.writeFieldEnd();
+  }
+  if (this.surname !== null && this.surname !== undefined) {
+    output.writeFieldBegin('surname', Thrift.Type.STRING, 4);
+    output.writeString(this.surname);
+    output.writeFieldEnd();
+  }
+  if (this.address !== null && this.address !== undefined) {
+    output.writeFieldBegin('address', Thrift.Type.STRING, 5);
+    output.writeString(this.address);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
 var DatabaseError = module.exports.DatabaseError = function(args) {
   Thrift.TException.call(this, "DatabaseError");
   this.name = "DatabaseError";

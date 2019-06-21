@@ -1,2 +1,15 @@
-# microservices
-Comparing different languages, frameworks and RPCs in context of building microservices
+# Microservices
+
+## Build
+
+```bash
+$ ./build.sh
+$ docker-compose up
+```
+
+## Stop
+
+```bash
+$ docker-compose stop
+```
+

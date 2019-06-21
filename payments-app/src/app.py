@@ -1,4 +1,5 @@
 import os
+from time import sleep
 
 from dotenv import load_dotenv
 from flask import Flask
@@ -10,6 +11,7 @@ from sqlalchemy.dialects.postgresql import TIMESTAMP
 from thrift import Thrift
 from thrift.transport import TSocket
 from thrift.transport import TTransport
+from thrift.transport.TTransport import TTransportException
 from thrift.protocol import TBinaryProtocol
 
 from warehouse_api import Warehouse
@@ -19,6 +21,8 @@ from warehouse_api.ttypes import UserInfo
 
 load_dotenv()
 
+WAREHOUSE_HOST=os.environ['WAREHOUSE_HOST']
+WAREHOUSE_PORT=os.environ['WAREHOUSE_PORT']
 DB_HOST = os.environ['DB_HOST']
 DB_NAME = os.environ['DB_NAME']
 DB_USERNAME = os.environ['DB_USERNAME']
@@ -27,18 +31,29 @@ DB_URL_TEMPLATE = 'postgresql+psycopg2://{user}:{pw}@{host}:5432/{db}'
 DB_URL = DB_URL_TEMPLATE.format(user=DB_USERNAME, pw=DB_PASSWORD, host=DB_HOST, db=DB_NAME)
 
 app = Flask(__name__)
-app.config['DEBUG'] = True
+app.config['DEBUG'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
 # warehouse api
-transport = TSocket.TSocket('localhost', 3000)
-transport = TTransport.TBufferedTransport(transport)
-protocol = TBinaryProtocol.TBinaryProtocol(transport)
-client = Warehouse.Client(protocol)
-transport.open()
+def connect_to_warehouse():
+    global client
+    transport = TSocket.TSocket(WAREHOUSE_HOST, WAREHOUSE_PORT)
+    transport = TTransport.TBufferedTransport(transport)
+    protocol = TBinaryProtocol.TBinaryProtocol(transport)
+    client = Warehouse.Client(protocol)
+    transport.open()
+
+
+client = None
+try:
+    connect_to_warehouse()
+except TTransportException as err:
+    print("Couldn't connect to warehouse, reconnecting in 5 seconds")
+    sleep(5)
+    connect_to_warehouse()
 
 
 class Transaction(db.Model):
@@ -69,8 +84,6 @@ manager.create_api(Transaction, methods=['GET', 'POST', 'DELETE'])
 manager.create_api(Account, methods=['GET', 'POST', 'DELETE'])
 
 
-# curl -d '{"userId": "1", "order": [{"_id": "123", "quantity": 2}]}' \
-# -H "Content-Type: application/json" -X POST http://localhost:5000/api/order
 @app.route('/api/order', methods=['POST'])
 def send_order():
     data = request.get_json()
@@ -93,7 +106,6 @@ def send_order():
 
 if __name__ == '__main__':
     app.run()
-    # print(models.Transaction.query.all())
 
 
 

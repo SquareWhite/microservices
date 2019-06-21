@@ -30,6 +30,14 @@ struct ItemInfo {
     6: optional i32 quantity
 }
 
+struct UserInfo {
+    1: optional string _id,
+    2: optional string name,
+    3: optional string middleName,
+    4: optional string surname,
+    5: optional string address
+}
+
 exception DatabaseError {
     1: string message
 }
@@ -73,6 +81,10 @@ service Warehouse {
         throws (1: DatabaseError error, 2: EntityNotFoundError error2),
 
     void deleteItem(1: ItemInfo info)
+        throws (1: DatabaseError error, 2: EntityNotFoundError error2),
+
+
+    void prepareOrder(1: UserInfo user, 2: list<ItemInfo> order)
         throws (1: DatabaseError error, 2: EntityNotFoundError error2)
 
 }

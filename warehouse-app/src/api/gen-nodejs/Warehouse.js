@@ -1407,6 +1407,159 @@ Warehouse_deleteItem_result.prototype.write = function(output) {
   return;
 };
 
+var Warehouse_prepareOrder_args = function(args) {
+  this.user = null;
+  this.order = null;
+  if (args) {
+    if (args.user !== undefined && args.user !== null) {
+      this.user = new ttypes.UserInfo(args.user);
+    }
+    if (args.order !== undefined && args.order !== null) {
+      this.order = Thrift.copyList(args.order, [ttypes.ItemInfo]);
+    }
+  }
+};
+Warehouse_prepareOrder_args.prototype = {};
+Warehouse_prepareOrder_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true) {
+    var ret = input.readFieldBegin();
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid) {
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.user = new ttypes.UserInfo();
+        this.user.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.LIST) {
+        this.order = [];
+        var _rtmp311 = input.readListBegin();
+        var _size10 = _rtmp311.size || 0;
+        for (var _i12 = 0; _i12 < _size10; ++_i12) {
+          var elem13 = null;
+          elem13 = new ttypes.ItemInfo();
+          elem13.read(input);
+          this.order.push(elem13);
+        }
+        input.readListEnd();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+Warehouse_prepareOrder_args.prototype.write = function(output) {
+  output.writeStructBegin('Warehouse_prepareOrder_args');
+  if (this.user !== null && this.user !== undefined) {
+    output.writeFieldBegin('user', Thrift.Type.STRUCT, 1);
+    this.user.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.order !== null && this.order !== undefined) {
+    output.writeFieldBegin('order', Thrift.Type.LIST, 2);
+    output.writeListBegin(Thrift.Type.STRUCT, this.order.length);
+    for (var iter14 in this.order) {
+      if (this.order.hasOwnProperty(iter14)) {
+        iter14 = this.order[iter14];
+        iter14.write(output);
+      }
+    }
+    output.writeListEnd();
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+var Warehouse_prepareOrder_result = function(args) {
+  this.error = null;
+  this.error2 = null;
+  if (args instanceof ttypes.DatabaseError) {
+    this.error = args;
+    return;
+  }
+  if (args instanceof ttypes.EntityNotFoundError) {
+    this.error2 = args;
+    return;
+  }
+  if (args) {
+    if (args.error !== undefined && args.error !== null) {
+      this.error = args.error;
+    }
+    if (args.error2 !== undefined && args.error2 !== null) {
+      this.error2 = args.error2;
+    }
+  }
+};
+Warehouse_prepareOrder_result.prototype = {};
+Warehouse_prepareOrder_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true) {
+    var ret = input.readFieldBegin();
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid) {
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.error = new ttypes.DatabaseError();
+        this.error.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.error2 = new ttypes.EntityNotFoundError();
+        this.error2.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+Warehouse_prepareOrder_result.prototype.write = function(output) {
+  output.writeStructBegin('Warehouse_prepareOrder_result');
+  if (this.error !== null && this.error !== undefined) {
+    output.writeFieldBegin('error', Thrift.Type.STRUCT, 1);
+    this.error.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.error2 !== null && this.error2 !== undefined) {
+    output.writeFieldBegin('error2', Thrift.Type.STRUCT, 2);
+    this.error2.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
 var WarehouseClient = exports.Client = function(output, pClass) {
   this.output = output;
   this.pClass = pClass;
@@ -2056,6 +2209,69 @@ WarehouseClient.prototype.recv_deleteItem = function(input,mtype,rseqid) {
   }
   callback(null);
 };
+
+WarehouseClient.prototype.prepareOrder = function(user, order, callback) {
+  this._seqid = this.new_seqid();
+  if (callback === undefined) {
+    var _defer = Q.defer();
+    this._reqs[this.seqid()] = function(error, result) {
+      if (error) {
+        _defer.reject(error);
+      } else {
+        _defer.resolve(result);
+      }
+    };
+    this.send_prepareOrder(user, order);
+    return _defer.promise;
+  } else {
+    this._reqs[this.seqid()] = callback;
+    this.send_prepareOrder(user, order);
+  }
+};
+
+WarehouseClient.prototype.send_prepareOrder = function(user, order) {
+  var output = new this.pClass(this.output);
+  var params = {
+    user: user,
+    order: order
+  };
+  var args = new Warehouse_prepareOrder_args(params);
+  try {
+    output.writeMessageBegin('prepareOrder', Thrift.MessageType.CALL, this.seqid());
+    args.write(output);
+    output.writeMessageEnd();
+    return this.output.flush();
+  }
+  catch (e) {
+    delete this._reqs[this.seqid()];
+    if (typeof output.reset === 'function') {
+      output.reset();
+    }
+    throw e;
+  }
+};
+
+WarehouseClient.prototype.recv_prepareOrder = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
+  }
+  var result = new Warehouse_prepareOrder_result();
+  result.read(input);
+  input.readMessageEnd();
+
+  if (null !== result.error) {
+    return callback(result.error);
+  }
+  if (null !== result.error2) {
+    return callback(result.error2);
+  }
+  callback(null);
+};
 var WarehouseProcessor = exports.Processor = function(handler) {
   this._handler = handler;
 };
@@ -2488,6 +2704,49 @@ WarehouseProcessor.prototype.process_deleteItem = function(seqid, input, output)
       } else {
         result_obj = new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, err.message);
         output.writeMessageBegin("deleteItem", Thrift.MessageType.EXCEPTION, seqid);
+      }
+      result_obj.write(output);
+      output.writeMessageEnd();
+      output.flush();
+    });
+  }
+};
+WarehouseProcessor.prototype.process_prepareOrder = function(seqid, input, output) {
+  var args = new Warehouse_prepareOrder_args();
+  args.read(input);
+  input.readMessageEnd();
+  if (this._handler.prepareOrder.length === 2) {
+    Q.fcall(this._handler.prepareOrder.bind(this._handler),
+      args.user,
+      args.order
+    ).then(function(result) {
+      var result_obj = new Warehouse_prepareOrder_result({success: result});
+      output.writeMessageBegin("prepareOrder", Thrift.MessageType.REPLY, seqid);
+      result_obj.write(output);
+      output.writeMessageEnd();
+      output.flush();
+    }).catch(function (err) {
+      var result;
+      if (err instanceof ttypes.DatabaseError || err instanceof ttypes.EntityNotFoundError) {
+        result = new Warehouse_prepareOrder_result(err);
+        output.writeMessageBegin("prepareOrder", Thrift.MessageType.REPLY, seqid);
+      } else {
+        result = new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, err.message);
+        output.writeMessageBegin("prepareOrder", Thrift.MessageType.EXCEPTION, seqid);
+      }
+      result.write(output);
+      output.writeMessageEnd();
+      output.flush();
+    });
+  } else {
+    this._handler.prepareOrder(args.user, args.order, function (err, result) {
+      var result_obj;
+      if ((err === null || typeof err === 'undefined') || err instanceof ttypes.DatabaseError || err instanceof ttypes.EntityNotFoundError) {
+        result_obj = new Warehouse_prepareOrder_result((err !== null || typeof err === 'undefined') ? err : {success: result});
+        output.writeMessageBegin("prepareOrder", Thrift.MessageType.REPLY, seqid);
+      } else {
+        result_obj = new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, err.message);
+        output.writeMessageBegin("prepareOrder", Thrift.MessageType.EXCEPTION, seqid);
       }
       result_obj.write(output);
       output.writeMessageEnd();

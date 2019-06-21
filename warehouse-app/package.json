@@ -9,6 +9,7 @@
   "dependencies": {
     "@mongoosejs/double": "^0.1.2",
     "dotenv": "^7.0.0",
+    "httpreq": "^0.4.24",
     "mongoose": "^5.4.20",
     "mongoose-int32": "^0.3.1",
     "thrift": "^0.12.0"

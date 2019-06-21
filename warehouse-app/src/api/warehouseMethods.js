@@ -1,6 +1,16 @@
+const util = require('util');
+
+const httpreq = require('httpreq');
+httpreq.post = util.promisify(httpreq.post);
+
 const storage = require('../storage');
 const utils = require('../utils');
 const apiTypes = require("./gen-nodejs/warehouse_types");
+
+
+const logisticsHost = process.env.LOGISTICS_APP_HOST;
+const logisticsPort = process.env.LOGISTICS_APP_PORT;
+const logisticsOrderEndpoint = `http://${logisticsHost}:${logisticsPort}/orders`;
 
 module.exports = {
     getManufacturerById: async (id) => {
@@ -118,6 +128,45 @@ module.exports = {
             if (!result.n) {
                 throw new EntityNotFoundError(`Item with specified conditions wasn't found.`);
             }
+        } catch (err) {
+            throwThriftError(err);
+        }
+    },
+
+    prepareOrder: async (user, orderedItems) => {
+        try {
+            user.id = user._id;
+            delete user._id;
+
+            utils.filterOutNullValues(orderedItems);
+            let tasksForItemsWithInfo = orderedItems.map(async item => {
+                let info = await storage.Item.findById(item._id);
+                if (!info) {
+                    throw new EntityNotFoundError(`Item with id ${item._id} wasn't found.`);
+                }
+                info.quantity -= item.quantity;
+                info.markModified('quantity');
+                await info.save();
+
+                return {
+                    "id": item._id,
+                    "height": 10,
+                    "length": 10,
+                    "width": 10,
+                    "price": info.price,
+                    "quantity": item.quantity,
+                    "weight": 100
+                }
+            });
+
+            let itemsWithInfo = await Promise.all(tasksForItemsWithInfo);
+            let result = await httpreq.post(logisticsOrderEndpoint, {
+              json: {
+                  user: user,
+                  order: itemsWithInfo
+              }
+          });
+            console.log(result);
         } catch (err) {
             throwThriftError(err);
         }
