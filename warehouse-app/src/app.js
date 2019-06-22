@@ -9,11 +9,13 @@ const password = process.env.DB_PASSWORD;
 
 function connect() {
     mongoose.connect(
-        `mongodb://${username}:${password}@${host}:27017/${dbName}`,
+        // `mongodb://${username}:${password}@${host}:27017/${dbName}`,
+        `mongodb://${host}:27017/${dbName}`,
         {useNewUrlParser: true},
         (err) => {
             if (err) {
-                console.error(`mongodb://${username}:${password}@${host}:27017/${dbName}`);
+                // console.error(`mongodb://${username}:${password}@${host}:27017/${dbName}`);
+                console.error(`mongodb://${host}:27017/${dbName}`);
                 console.error('Failed to connect, retrying in 5 seconds...');
                 setTimeout(connect, 5000);
             }
